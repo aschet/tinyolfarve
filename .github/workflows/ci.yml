@@ -102,7 +102,7 @@ jobs:
           }
           EOF
           riscv64-unknown-elf-g++ \
-            -march=rv32imac -mabi=ilp32 --specs=picolibc.specs \
+            -march=rv32imac -mabi=ilp32 --specs=picolibc.specs -nostdlib++ \
             -Os -std=c++11 -fno-exceptions -fno-rtti \
             -Wl,--gc-sections \
             -Isrc main.cpp src/color.cpp -o firmware.elf
