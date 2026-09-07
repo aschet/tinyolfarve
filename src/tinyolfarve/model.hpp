@@ -113,9 +113,10 @@ struct weight_table
 [[nodiscard]] constexpr spectrum_weight make_weight(size_t index,
                                                     float k) noexcept
 {
-    return spectrum_weight{k * cie_samples[index].s_d65 * cie_samples[index].x_bar,
-                           k * cie_samples[index].s_d65 * cie_samples[index].y_bar,
-                           k * cie_samples[index].s_d65 * cie_samples[index].z_bar};
+    return spectrum_weight{
+        k * cie_samples[index].s_d65 * cie_samples[index].x_bar,
+        k * cie_samples[index].s_d65 * cie_samples[index].y_bar,
+        k * cie_samples[index].s_d65 * cie_samples[index].z_bar};
 }
 
 /// A compile-time sequence of indices, standing in for C++14's
@@ -141,6 +142,7 @@ struct make_index_sequence<0, Is...>
 /// loop cannot appear in a C++11 constexpr function body either way.
 template <size_t... Is>
 [[nodiscard]] constexpr weight_table
+// NOLINTNEXTLINE(readability-named-parameter): only used to deduce Is...
 build_weight_table(float k, index_sequence<Is...>) noexcept
 {
     return weight_table{{make_weight(Is, k)...}};
@@ -166,7 +168,14 @@ constexpr weight_table weights TINYOLFARVE_FLASH = build_weight_table();
 /// to the non-linear signal a display decodes.
 [[nodiscard]] inline float encode_gamma(float linear) noexcept
 {
-    linear = linear < 0.0F ? 0.0F : (linear > 1.0F ? 1.0F : linear);
+    if (linear < 0.0F)
+    {
+        linear = 0.0F;
+    }
+    else if (linear > 1.0F)
+    {
+        linear = 1.0F;
+    }
     if (linear <= gamma_threshold)
     {
         return linear * gamma_slope;

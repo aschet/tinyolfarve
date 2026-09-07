@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 Thomas Ascher <thomas.ascher@gmx.at>
+#
+# SPDX-License-Identifier: MIT
+#
+# Inherits the parent config, minus two checks that don't fit test code:
+# readability-magic-numbers/cppcoreguidelines-avoid-magic-numbers would want
+# every literal test input (10.0F, 20.0F, ...) named, which is busywork
+# here, not a real readability improvement; misc-include-cleaner doesn't
+# know Unity's macros (UNITY_BEGIN, RUN_TEST, ...) come from <unity.h> --
+# its header isn't annotated for the tool -- and separately wants tests to
+# bypass the umbrella <tinyolfarve/tinyolfarve.hpp> header the README
+# documents as the way to use the library.
+InheritParentConfig: true
+Checks: >
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -misc-include-cleaner

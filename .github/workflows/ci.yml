@@ -75,3 +75,22 @@ jobs:
             -Wl,--gc-sections -Wl,--entry=main \
             -Isrc main.cpp src/color.cpp -o firmware.elf
           arm-none-eabi-size firmware.elf
+
+  tidy:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install clang-tidy
+        run: |
+          pipx install "clang-tidy==21.1.6"
+          pipx environment --value PIPX_BIN_DIR >> "$GITHUB_PATH"
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Debug
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Check
+        run: |
+          clang-tidy -p build --warnings-as-errors='*' \
+            src/color.cpp test/test_color/*.cpp

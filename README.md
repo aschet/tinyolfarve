@@ -23,6 +23,7 @@ as a static library only.
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
+cmake --install build
 ```
 
 ### PlatformIO
@@ -62,3 +63,22 @@ const uint32_t packed = color.to_rgb888();
 // Or start from an absorbance measured at 430 nm
 tinyolfarve::absorption_to_srgb(0.7874F);
 ```
+
+## Development
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_COMPILE_WARNING_AS_ERROR=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+cmake --build build
+ctest --test-dir build
+```
+
+Or with PlatformIO, which also verifies the real Arduino AVR toolchain
+accepts the library:
+
+```bash
+pio test -e native
+pio test -e uno --without-uploading --without-testing
+```
+
+Naming and layout follow the Boost conventions, encoded in `.clang-format`.

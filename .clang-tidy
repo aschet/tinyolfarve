@@ -1,0 +1,76 @@
+# SPDX-FileCopyrightText: 2026 Thomas Ascher <thomas.ascher@gmx.at>
+#
+# SPDX-License-Identifier: MIT
+#
+# C++ Core Guidelines enforcement, minus the checks that only have a GSL
+# answer, the macro checks, and (unlike cppolfarve) the C-array checks: this
+# library avoids <array>/<cstdint>/exceptions/RTTI by design, since AVR's
+# toolchain ships none of them -- cppcoreguidelines-avoid-c-arrays and
+# modernize-avoid-c-arrays would flag every deliberate raw array (the CIE
+# table, the XYZ-to-sRGB matrix rows) as violations of a rule this codebase
+# has a real, verified reason to break.
+# Also disabled, for the same reason -- C++11, not cppolfarve's C++17:
+# modernize-concat-nested-namespaces would rewrite `namespace tinyolfarve {
+# namespace detail {` into the `namespace tinyolfarve::detail` syntax, which
+# is C++17-only and would break the Arduino AVR build (hardcodes
+# -std=gnu++11); modernize-deprecated-headers would rewrite <stdint.h> and
+# friends into <cstdint>, which AVR's toolchain does not ship at all;
+# misc-no-recursion flags the recursive constexpr helpers (sum_luminance,
+# the index_sequence machinery) used specifically because a C++11 constexpr
+# function may only be a single return statement, never a loop -- the
+# recursion is compile-time only, not a runtime stack-depth risk.
+# readability-identifier-naming encodes the Boost naming rules, so the
+# convention is machine checked rather than prose in the README.
+
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-macro-to-enum,
+  -cppcoreguidelines-macro-usage,
+  -modernize-macro-to-enum,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-avoid-c-arrays,
+  -modernize-avoid-c-arrays,
+  -modernize-concat-nested-namespaces,
+  -modernize-deprecated-headers,
+  -misc-no-recursion,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*/(src|test)/.*\.(hpp|cpp)$'
+FormatStyle: file
+
+CheckOptions:
+  # srgb_color and rgb8 are plain aggregates with no invariant to protect,
+  # which is what the guidelines ask a struct to be (C.2, C.8).
+  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: true
+
+  # Boost naming: everything lowercase with underscores, macros excepted.
+  readability-identifier-naming.NamespaceCase: lower_case
+  readability-identifier-naming.ClassCase: lower_case
+  readability-identifier-naming.StructCase: lower_case
+  readability-identifier-naming.UnionCase: lower_case
+  readability-identifier-naming.EnumCase: lower_case
+  readability-identifier-naming.EnumConstantCase: lower_case
+  readability-identifier-naming.FunctionCase: lower_case
+  readability-identifier-naming.MethodCase: lower_case
+  readability-identifier-naming.MemberCase: lower_case
+  readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-naming.ParameterCase: lower_case
+  readability-identifier-naming.ConstantCase: lower_case
+  readability-identifier-naming.ConstexprVariableCase: lower_case
+  readability-identifier-naming.GlobalConstantCase: lower_case
+  readability-identifier-naming.StaticConstantCase: lower_case
+  readability-identifier-naming.TypeAliasCase: lower_case
+  readability-identifier-naming.TypedefCase: lower_case
+  readability-identifier-naming.TemplateParameterCase: CamelCase
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE

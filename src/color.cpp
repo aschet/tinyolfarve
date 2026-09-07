@@ -5,8 +5,10 @@
 #include <tinyolfarve/color.hpp>
 
 #include <math.h>
+#include <stddef.h>
 #include <stdint.h>
 
+#include "tinyolfarve/cie.hpp"
 #include "tinyolfarve/model.hpp"
 
 namespace tinyolfarve
@@ -24,9 +26,15 @@ constexpr float channel_max = 255.0F;
     {
         return 0;
     }
-    const float clamped = component < 0.0F ? 0.0F
-                          : component > 1.0F ? 1.0F
-                                              : component;
+    float clamped = component;
+    if (clamped < 0.0F)
+    {
+        clamped = 0.0F;
+    }
+    else if (clamped > 1.0F)
+    {
+        clamped = 1.0F;
+    }
     return static_cast<uint8_t>(::roundf(clamped * channel_max));
 }
 
@@ -47,7 +55,8 @@ uint32_t srgb_color::to_rgb888() const noexcept
     return to_rgb8().to_rgb888();
 }
 
-srgb_color absorption_to_srgb(float absorption_430, float path_length_cm) noexcept
+srgb_color absorption_to_srgb(float absorption_430,
+                              float path_length_cm) noexcept
 {
     // Beer-Lambert law: absorbance A = a * l, and transmittance T = 10 ** -A.
     const float absorbance_430 = absorption_430 * path_length_cm;

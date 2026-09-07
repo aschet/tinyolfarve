@@ -30,6 +30,17 @@ namespace tinyolfarve
 /// https://www.bjcp.org/education-training/education-resources/color-guide
 constexpr float default_path_length_cm = 5.0F;
 
+namespace detail
+{
+constexpr uint8_t rgb565_red_mask = 0xF8U;
+constexpr uint8_t rgb565_green_mask = 0xFCU;
+constexpr unsigned int rgb565_red_shift = 8U;
+constexpr unsigned int rgb565_green_shift = 3U;
+constexpr unsigned int rgb565_blue_shift = 3U;
+constexpr unsigned int rgb888_red_shift = 16U;
+constexpr unsigned int rgb888_green_shift = 8U;
+} // namespace detail
+
 /// An sRGB color quantized to 8 bits per channel.
 struct rgb8
 {
@@ -37,10 +48,11 @@ struct rgb8
     uint8_t g;
     uint8_t b;
 
-    constexpr rgb8() noexcept : r(0), g(0), b(0)
-    {
-    }
+    constexpr rgb8() noexcept : r(0), g(0), b(0) {}
 
+    // r, g, b is the universal color-channel order; there's no plausible
+    // accidental swap.
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     constexpr rgb8(uint8_t red, uint8_t green, uint8_t blue) noexcept
         : r(red), g(green), b(blue)
     {
@@ -51,17 +63,21 @@ struct rgb8
     /// 5 bits blue, red in the high bits.
     [[nodiscard]] constexpr uint16_t to_rgb565() const noexcept
     {
-        return static_cast<uint16_t>((static_cast<uint16_t>(r & 0xF8U) << 8)
-                                      | (static_cast<uint16_t>(g & 0xFCU) << 3)
-                                      | (b >> 3));
+        return static_cast<uint16_t>(
+            (static_cast<uint16_t>(r & detail::rgb565_red_mask)
+             << detail::rgb565_red_shift)
+            | (static_cast<uint16_t>(g & detail::rgb565_green_mask)
+               << detail::rgb565_green_shift)
+            | (b >> detail::rgb565_blue_shift));
     }
 
     /// Return the color packed as 0x00RRGGBB, the form libraries like
     /// Adafruit_NeoPixel's `Color(r, g, b)` return for addressable LEDs.
     [[nodiscard]] constexpr uint32_t to_rgb888() const noexcept
     {
-        return (static_cast<uint32_t>(r) << 16)
-               | (static_cast<uint32_t>(g) << 8) | static_cast<uint32_t>(b);
+        return (static_cast<uint32_t>(r) << detail::rgb888_red_shift)
+               | (static_cast<uint32_t>(g) << detail::rgb888_green_shift)
+               | static_cast<uint32_t>(b);
     }
 };
 
@@ -85,10 +101,11 @@ struct srgb_color
     float g;
     float b;
 
-    constexpr srgb_color() noexcept : r(0.0F), g(0.0F), b(0.0F)
-    {
-    }
+    constexpr srgb_color() noexcept : r(0.0F), g(0.0F), b(0.0F) {}
 
+    // r, g, b is the universal color-channel order; there's no plausible
+    // accidental swap.
+    // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
     constexpr srgb_color(float red, float green, float blue) noexcept
         : r(red), g(green), b(blue)
     {
@@ -100,7 +117,8 @@ struct srgb_color
     /// triplet even for an instance built by hand out of range.
     [[nodiscard]] rgb8 to_rgb8() const noexcept;
 
-    /// Return the color packed as RGB565. Equivalent to `to_rgb8().to_rgb565()`.
+    /// Return the color packed as RGB565. Equivalent to
+    /// `to_rgb8().to_rgb565()`.
     [[nodiscard]] uint16_t to_rgb565() const noexcept;
 
     /// Return the color packed as 0x00RRGGBB. Equivalent to
@@ -139,24 +157,25 @@ constexpr bool operator!=(const srgb_color& lhs, const srgb_color& rhs) noexcept
 ///        defined for a 1 cm path length.
 /// \param path_length_cm Optical path length in cm, e.g. the glass width.
 /// \return The gamma encoded color, with components in [0, 1].
-[[nodiscard]] srgb_color absorption_to_srgb(
-    float absorption_430, float path_length_cm = default_path_length_cm) noexcept;
+[[nodiscard]] srgb_color
+absorption_to_srgb(float absorption_430,
+                   float path_length_cm = default_path_length_cm) noexcept;
 
 /// Convert a Standard Reference Method color value into an sRGB color.
 ///
 /// \param srm The SRM color value.
 /// \param path_length_cm Optical path length in cm, e.g. the glass width.
 /// \return The gamma encoded color, with components in [0, 1].
-[[nodiscard]] srgb_color srm_to_srgb(
-    float srm, float path_length_cm = default_path_length_cm) noexcept;
+[[nodiscard]] srgb_color
+srm_to_srgb(float srm, float path_length_cm = default_path_length_cm) noexcept;
 
 /// Convert a European Brewery Convention color value into an sRGB color.
 ///
 /// \param ebc The EBC color value.
 /// \param path_length_cm Optical path length in cm, e.g. the glass width.
 /// \return The gamma encoded color, with components in [0, 1].
-[[nodiscard]] srgb_color ebc_to_srgb(
-    float ebc, float path_length_cm = default_path_length_cm) noexcept;
+[[nodiscard]] srgb_color
+ebc_to_srgb(float ebc, float path_length_cm = default_path_length_cm) noexcept;
 
 } // namespace tinyolfarve
 

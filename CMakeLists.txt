@@ -5,6 +5,8 @@
 cmake_minimum_required(VERSION 3.28...4.2)
 project(tinyolfarve LANGUAGES CXX)
 
+include(GNUInstallDirs)
+
 add_library(tinyolfarve STATIC)
 add_library(tinyolfarve::tinyolfarve ALIAS tinyolfarve)
 
@@ -34,3 +36,7 @@ if(PROJECT_IS_TOP_LEVEL)
         add_subdirectory(test)
     endif()
 endif()
+
+install(TARGETS tinyolfarve
+    FILE_SET HEADERS
+)
