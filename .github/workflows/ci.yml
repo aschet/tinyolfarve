@@ -76,6 +76,35 @@ jobs:
             -Isrc main.cpp src/color.cpp -o firmware.elf
           arm-none-eabi-size firmware.elf
 
+  riscv:
+    name: RISC-V cross-compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-unknown-elf \
+            picolibc-riscv64-unknown-elf libstdc++-riscv64-unknown-elf-picolibc
+
+      - name: Build
+        run: |
+          cat > main.cpp <<'EOF'
+          #include <tinyolfarve/tinyolfarve.hpp>
+          volatile uint16_t result;
+          extern "C" int main() {
+              result = tinyolfarve::srm_to_srgb(10.0F).to_rgb565();
+              while (1) {}
+          }
+          EOF
+          riscv64-unknown-elf-g++ \
+            -march=rv32imac -mabi=ilp32 --specs=picolibcpp.specs \
+            -Os -std=c++11 -fno-exceptions -fno-rtti \
+            -Wl,--gc-sections \
+            -Isrc main.cpp src/color.cpp -o firmware.elf
+          riscv64-unknown-elf-size firmware.elf
+
   tidy:
     name: Static analysis
     runs-on: ubuntu-latest
