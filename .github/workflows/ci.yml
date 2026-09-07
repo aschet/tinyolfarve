@@ -18,7 +18,7 @@ jobs:
     name: CMake
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build and test
         run: |
@@ -32,7 +32,7 @@ jobs:
     name: PlatformIO
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install toolchain
         run: |
@@ -53,7 +53,7 @@ jobs:
     name: Cortex-M cross-compile
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install toolchain
         run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
@@ -80,7 +80,7 @@ jobs:
     name: Static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install clang-tidy
         run: |
           pipx install "clang-tidy==21.1.6"
