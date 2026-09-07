@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-"""Update the version number in library.json and library.properties."""
+"""Update the version number in library.json, library.properties, and the
+README's lib_deps example."""
 
 import re
 import sys
@@ -13,6 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 FILES = {
     ROOT / "library.json": (r'("version":\s*")[^"]+(")', r"\g<1>{version}\g<2>"),
     ROOT / "library.properties": (r"(?m)^(version=).+$", r"\g<1>{version}"),
+    ROOT / "README.md": (r"(lib_deps = aschet/tinyolfarve@\^)[^\s]+",
+                         r"\g<1>{version}"),
 }
 
 
