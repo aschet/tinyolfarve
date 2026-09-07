@@ -15,6 +15,7 @@
         }
     ],
     "license": "MIT",
+    "headers": ["tinyolfarve.hpp", "color.hpp"],
     "frameworks": "*",
     "platforms": "*",
     "export": {
