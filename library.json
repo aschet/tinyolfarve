@@ -2,7 +2,7 @@
     "name": "tinyolfarve",
     "version": "1.0.0",
     "description": "sRGB rendering of SRM/EBC beer color values.",
-    "keywords": ["beer", "brewing", "color", "srm", "ebc", "srgb", "colorimetry"],
+    "keywords": ["beer", "brewing", "color", "srm", "ebc", "srgb", "colorimetry", "embedded", "arduino", "avr", "led", "display"],
     "homepage": "https://github.com/aschet/tinyolfarve",
     "repository": {
         "type": "git",
