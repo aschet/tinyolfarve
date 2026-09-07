@@ -20,6 +20,7 @@ target_sources(tinyolfarve
         FILE_SET HEADERS
             BASE_DIRS src
             FILES
+                src/tinyolfarve.hpp
                 src/tinyolfarve/color.hpp
                 src/tinyolfarve/tinyolfarve.hpp
 )
