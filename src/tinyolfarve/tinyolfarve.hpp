@@ -17,6 +17,5 @@
 #define TINYOLFARVE_TINYOLFARVE_HPP
 
 #include <tinyolfarve/color.hpp>
-#include <tinyolfarve/version.hpp>
 
 #endif // TINYOLFARVE_TINYOLFARVE_HPP

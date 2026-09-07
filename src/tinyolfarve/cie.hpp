@@ -22,7 +22,9 @@
 
 #include <stddef.h>
 
-namespace tinyolfarve::detail
+namespace tinyolfarve
+{
+namespace detail
 {
 
 /// Wavelength of the first sample in \ref cie_samples, in nanometers.
@@ -132,6 +134,7 @@ constexpr cie_sample cie_samples[cie_sample_count] = {
     {0.000042F, 0.000015F, 0.000000F, 63.3828F},  // 780 nm
 };
 
-} // namespace tinyolfarve::detail
+} // namespace detail
+} // namespace tinyolfarve
 
 #endif // TINYOLFARVE_CIE_HPP

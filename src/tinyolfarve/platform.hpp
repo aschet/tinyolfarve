@@ -15,7 +15,9 @@
 #include <avr/pgmspace.h>
 #endif
 
-namespace tinyolfarve::detail
+namespace tinyolfarve
+{
+namespace detail
 {
 
 #ifdef __AVR__
@@ -41,6 +43,7 @@ template <typename T>
 #endif
 }
 
-} // namespace tinyolfarve::detail
+} // namespace detail
+} // namespace tinyolfarve
 
 #endif // TINYOLFARVE_PLATFORM_HPP

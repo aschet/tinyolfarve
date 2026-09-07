@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "model.hpp"
+#include "tinyolfarve/model.hpp"
 
 namespace tinyolfarve
 {

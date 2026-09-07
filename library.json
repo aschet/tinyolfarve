@@ -1,0 +1,19 @@
+{
+    "name": "tinyolfarve",
+    "version": "1.0.0",
+    "description": "sRGB rendering of SRM/EBC beer color values.",
+    "keywords": ["beer", "brewing", "color", "srm", "ebc", "srgb", "colorimetry"],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aschet/tinyolfarve.git"
+    },
+    "authors": [
+        {
+            "name": "Thomas Ascher",
+            "email": "thomas.ascher@gmx.at"
+        }
+    ],
+    "license": "MIT",
+    "frameworks": "*",
+    "platforms": "*"
+}

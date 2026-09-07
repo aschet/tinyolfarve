@@ -8,6 +8,11 @@
 /// Header only and free of state, so the tests can exercise the pieces the
 /// public API composes. This header is internal to the library; it is not
 /// installed and its contents may change without notice.
+///
+/// Written to C++11's stricter `constexpr` rules (a single return statement
+/// per function, no loops) rather than C++14's, since Arduino's AVR board
+/// package hardcodes `-std=gnu++11` regardless of what the compiler itself
+/// would otherwise default to.
 
 #ifndef TINYOLFARVE_MODEL_HPP
 #define TINYOLFARVE_MODEL_HPP
@@ -18,7 +23,9 @@
 #include "cie.hpp"
 #include "platform.hpp"
 
-namespace tinyolfarve::detail
+namespace tinyolfarve
+{
+namespace detail
 {
 
 // Both scales are defined as a multiple of the absorbance at 430 nm measured
@@ -55,9 +62,9 @@ constexpr float gamma_exponent = 1.0F / 2.4F;
 /// K normalizing constant, folded together. See \ref build_weight_table.
 struct spectrum_weight
 {
-    float x = 0.0F;
-    float y = 0.0F;
-    float z = 0.0F;
+    float x;
+    float y;
+    float z;
 };
 
 /// Return one row of the XYZ to linear sRGB matrix applied to a tristimulus
@@ -76,39 +83,73 @@ struct spectrum_weight
            + (long_decay_weight * ::expf(-offset_nm / long_decay_nm));
 }
 
+/// Sum S(lambda) * y_bar(lambda) over entries [index, cie_sample_count),
+/// recursively: a C++11 constexpr function may only be a single return
+/// statement, so this replaces what would otherwise be a loop.
+[[nodiscard]] constexpr float sum_luminance(size_t index) noexcept
+{
+    return index == cie_sample_count
+               ? 0.0F
+               : (cie_samples[index].s_d65 * cie_samples[index].y_bar)
+                     + sum_luminance(index + 1);
+}
+
 /// K, as CIE defines it: 100 / sum(S(lambda) * y_bar(lambda)), putting the
 /// luminance of a perfectly transmitting sample at 100. Dropping the factor
 /// of 100 puts it at 1.0 instead, which is the range sRGB expects.
 [[nodiscard]] constexpr float compute_k() noexcept
 {
-    float luminance = 0.0F;
-    for (const cie_sample& sample : cie_samples)
-    {
-        luminance += sample.s_d65 * sample.y_bar;
-    }
-    return 1.0F / luminance;
+    return 1.0F / sum_luminance(0);
 }
 
 /// The compile-time-computed weight table, one \ref spectrum_weight per
 /// \ref cie_samples entry.
 struct weight_table
 {
-    spectrum_weight entries[cie_sample_count] = {};
+    spectrum_weight entries[cie_sample_count];
 };
 
-/// Build \ref weight_table from \ref cie_samples and \ref compute_k.
+/// Return the \ref spectrum_weight for \ref cie_samples entry \p index.
+[[nodiscard]] constexpr spectrum_weight make_weight(size_t index,
+                                                    float k) noexcept
+{
+    return spectrum_weight{k * cie_samples[index].s_d65 * cie_samples[index].x_bar,
+                           k * cie_samples[index].s_d65 * cie_samples[index].y_bar,
+                           k * cie_samples[index].s_d65 * cie_samples[index].z_bar};
+}
+
+/// A compile-time sequence of indices, standing in for C++14's
+/// `std::index_sequence` (not available under C++11).
+template <size_t...>
+struct index_sequence
+{
+};
+
+template <size_t N, size_t... Is>
+struct make_index_sequence : make_index_sequence<N - 1, N - 1, Is...>
+{
+};
+
+template <size_t... Is>
+struct make_index_sequence<0, Is...>
+{
+    using type = index_sequence<Is...>;
+};
+
+/// Build \ref weight_table by expanding one \ref make_weight call per index:
+/// the array-building equivalent of \ref sum_luminance's recursion, since a
+/// loop cannot appear in a C++11 constexpr function body either way.
+template <size_t... Is>
+[[nodiscard]] constexpr weight_table
+build_weight_table(float k, index_sequence<Is...>) noexcept
+{
+    return weight_table{{make_weight(Is, k)...}};
+}
+
 [[nodiscard]] constexpr weight_table build_weight_table() noexcept
 {
-    weight_table table;
-    const float k = compute_k();
-    for (size_t i = 0; i < cie_sample_count; ++i)
-    {
-        const float weight = k * cie_samples[i].s_d65;
-        table.entries[i] = spectrum_weight{weight * cie_samples[i].x_bar,
-                                           weight * cie_samples[i].y_bar,
-                                           weight * cie_samples[i].z_bar};
-    }
-    return table;
+    return build_weight_table(
+        compute_k(), typename make_index_sequence<cie_sample_count>::type());
 }
 
 constexpr weight_table weights TINYOLFARVE_FLASH = build_weight_table();
@@ -133,6 +174,7 @@ constexpr weight_table weights TINYOLFARVE_FLASH = build_weight_table();
     return (gamma_scale * ::powf(linear, gamma_exponent)) - gamma_offset;
 }
 
-} // namespace tinyolfarve::detail
+} // namespace detail
+} // namespace tinyolfarve
 
 #endif // TINYOLFARVE_MODEL_HPP

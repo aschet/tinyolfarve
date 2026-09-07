@@ -33,9 +33,18 @@ constexpr float default_path_length_cm = 5.0F;
 /// An sRGB color quantized to 8 bits per channel.
 struct rgb8
 {
-    uint8_t r = 0;
-    uint8_t g = 0;
-    uint8_t b = 0;
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+
+    constexpr rgb8() noexcept : r(0), g(0), b(0)
+    {
+    }
+
+    constexpr rgb8(uint8_t red, uint8_t green, uint8_t blue) noexcept
+        : r(red), g(green), b(blue)
+    {
+    }
 
     /// Return the color packed as RGB565, the pixel format most SPI TFT
     /// controllers (ILI9341, ST7735, ...) expect: 5 bits red, 6 bits green,
@@ -64,9 +73,18 @@ constexpr bool operator!=(const rgb8& lhs, const rgb8& rhs) noexcept
 /// An sRGB color, gamma encoded, with components in [0, 1].
 struct srgb_color
 {
-    float r = 0.0F;
-    float g = 0.0F;
-    float b = 0.0F;
+    float r;
+    float g;
+    float b;
+
+    constexpr srgb_color() noexcept : r(0.0F), g(0.0F), b(0.0F)
+    {
+    }
+
+    constexpr srgb_color(float red, float green, float blue) noexcept
+        : r(red), g(green), b(blue)
+    {
+    }
 
     /// Return the color quantized to 8 bits per channel.
     ///
