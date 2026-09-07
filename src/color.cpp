@@ -42,6 +42,11 @@ uint16_t srgb_color::to_rgb565() const noexcept
     return to_rgb8().to_rgb565();
 }
 
+uint32_t srgb_color::to_rgb888() const noexcept
+{
+    return to_rgb8().to_rgb888();
+}
+
 srgb_color absorption_to_srgb(float absorption_430, float path_length_cm) noexcept
 {
     // Beer-Lambert law: absorbance A = a * l, and transmittance T = 10 ** -A.

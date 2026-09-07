@@ -55,6 +55,14 @@ struct rgb8
                                       | (static_cast<uint16_t>(g & 0xFCU) << 3)
                                       | (b >> 3));
     }
+
+    /// Return the color packed as 0x00RRGGBB, the form libraries like
+    /// Adafruit_NeoPixel's `Color(r, g, b)` return for addressable LEDs.
+    [[nodiscard]] constexpr uint32_t to_rgb888() const noexcept
+    {
+        return (static_cast<uint32_t>(r) << 16)
+               | (static_cast<uint32_t>(g) << 8) | static_cast<uint32_t>(b);
+    }
 };
 
 /// \relates rgb8
@@ -94,6 +102,10 @@ struct srgb_color
 
     /// Return the color packed as RGB565. Equivalent to `to_rgb8().to_rgb565()`.
     [[nodiscard]] uint16_t to_rgb565() const noexcept;
+
+    /// Return the color packed as 0x00RRGGBB. Equivalent to
+    /// `to_rgb8().to_rgb888()`.
+    [[nodiscard]] uint32_t to_rgb888() const noexcept;
 };
 
 /// \relates srgb_color
