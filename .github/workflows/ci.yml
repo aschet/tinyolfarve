@@ -14,8 +14,8 @@ defaults:
     shell: bash
 
 jobs:
-  native:
-    name: Native (CMake, CTest)
+  cmake:
+    name: CMake
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -29,36 +29,36 @@ jobs:
           ctest --test-dir build --output-on-failure
 
   platformio:
-    name: PlatformIO (native, AVR Uno)
+    name: PlatformIO
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install PlatformIO
+      - name: Install toolchain
         run: |
           pipx install platformio
           pipx environment --value PIPX_BIN_DIR >> "$GITHUB_PATH"
 
-      - name: Run native tests
+      - name: Test (native)
         run: pio test -e native
 
       # No hardware attached here, so this only verifies that the real
       # Arduino AVR toolchain and framework accept the library -- this is
       # what caught a real C++11/constexpr incompatibility during
       # development that direct avr-g++ invocations alone did not.
-      - name: Build for AVR Uno
+      - name: Build (AVR Uno)
         run: pio test -e uno --without-uploading --without-testing
 
   cortex-m:
-    name: Cortex-M cross-compile smoke test
+    name: Cortex-M cross-compile
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install the ARM GNU toolchain
+      - name: Install toolchain
         run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
 
-      - name: Compile for Cortex-M4
+      - name: Build
         run: |
           cat > main.cpp <<'EOF'
           #include <tinyolfarve/tinyolfarve.hpp>
