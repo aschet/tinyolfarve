@@ -23,10 +23,18 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-The library requires C++14 or newer and has no runtime dependencies. Builds
-as a static library only. Or vendor the two files under `src/` plus the one
-under `include/` directly into a sketch or vendor SDK, skipping CMake
-entirely.
+Or add it as a PlatformIO dependency:
+
+```ini
+lib_deps = https://github.com/aschet/tinyolfarve.git
+```
+
+Or in the Arduino IDE: Sketch > Include Library > Add .ZIP Library, pointing
+at a release archive.
+
+The library requires C++11 or newer and has no runtime dependencies. Builds
+as a static library only. Or vendor `src/` directly into a sketch or vendor
+SDK, skipping any build system entirely.
 
 ## Usage
 

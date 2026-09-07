@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  native:
+    name: Native (CMake, CTest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and test
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_COMPILE_WARNING_AS_ERROR=ON
+          cmake --build build
+          ctest --test-dir build --output-on-failure
+
+  platformio:
+    name: PlatformIO (native, AVR Uno)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install PlatformIO
+        run: |
+          pipx install platformio
+          pipx environment --value PIPX_BIN_DIR >> "$GITHUB_PATH"
+
+      - name: Run native tests
+        run: pio test -e native
+
+      # No hardware attached here, so this only verifies that the real
+      # Arduino AVR toolchain and framework accept the library -- this is
+      # what caught a real C++11/constexpr incompatibility during
+      # development that direct avr-g++ invocations alone did not.
+      - name: Build for AVR Uno
+        run: pio test -e uno --without-uploading --without-testing
+
+  cortex-m:
+    name: Cortex-M cross-compile smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the ARM GNU toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+
+      - name: Compile for Cortex-M4
+        run: |
+          cat > main.cpp <<'EOF'
+          #include <tinyolfarve/tinyolfarve.hpp>
+          volatile uint16_t result;
+          extern "C" int main() {
+              result = tinyolfarve::srm_to_srgb(10.0F).to_rgb565();
+              while (1) {}
+          }
+          EOF
+          arm-none-eabi-g++ \
+            -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 \
+            -Os -std=c++11 -fno-exceptions -fno-rtti \
+            --specs=nano.specs --specs=nosys.specs -nostartfiles \
+            -Wl,--gc-sections -Wl,--entry=main \
+            -Isrc main.cpp src/color.cpp -o firmware.elf
+          arm-none-eabi-size firmware.elf
