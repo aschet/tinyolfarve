@@ -85,9 +85,12 @@ jobs:
       - name: Install toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-riscv64-unknown-elf \
-            picolibc-riscv64-unknown-elf libstdc++-riscv64-unknown-elf-picolibc
+          sudo apt-get install -y gcc-riscv64-unknown-elf picolibc-riscv64-unknown-elf
 
+      # Plain picolibc.specs (C runtime), not picolibcpp.specs: the library
+      # uses no exceptions, RTTI, or STL, so it needs no real C++ runtime,
+      # and this avoids a dependency (libstdc++-riscv64-unknown-elf-picolibc)
+      # that doesn't exist on this runner's Ubuntu release yet.
       - name: Build
         run: |
           cat > main.cpp <<'EOF'
@@ -99,7 +102,7 @@ jobs:
           }
           EOF
           riscv64-unknown-elf-g++ \
-            -march=rv32imac -mabi=ilp32 --specs=picolibcpp.specs \
+            -march=rv32imac -mabi=ilp32 --specs=picolibc.specs \
             -Os -std=c++11 -fno-exceptions -fno-rtti \
             -Wl,--gc-sections \
             -Isrc main.cpp src/color.cpp -o firmware.elf
