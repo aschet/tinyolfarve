@@ -31,7 +31,7 @@ cmake --install build
 ### PlatformIO
 
 ```ini
-lib_deps = https://github.com/aschet/tinyolfarve.git
+lib_deps = aschet/tinyolfarve@^1.0.1
 ```
 
 ### Arduino IDE
