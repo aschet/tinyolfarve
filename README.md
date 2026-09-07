@@ -1,5 +1,7 @@
 # tinyolfarve
 
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/aschet/library/tinyolfarve.svg)](https://registry.platformio.org/libraries/aschet/tinyolfarve)
+
 Port of [cppolfarve](https://github.com/aschet/cppolfarve) for embedded
 systems: AVR (e.g. Arduino Uno) and Cortex-M boards with tight flash/RAM
 budgets. If you're targeting a desktop, server, or a board with megabytes of
